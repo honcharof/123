@@ -1,0 +1,42 @@
+properties([pipelineTriggers([githubPush()])])
+
+pipeline {
+    agent any
+    
+
+
+    stages {
+        stage('git clone') {
+            steps {
+                
+                git branch: 'main',
+                url: 'https://github.com/honcharof/maven'
+
+            }
+        
+        }
+        stage('build code'){
+            
+            steps{
+              sh 'mvn clean install'
+              
+            }
+            
+            
+        }
+        
+
+        stage('Publish') {
+            steps {
+                withAWS (role:'YourNewRole',roleAccount:'*********') {
+                
+                  s3Upload(file: './target/gs-maven-0.1.0.jar', bucket: 'backet_name', path: '')
+                }
+            }
+
+        }
+
+        
+    }
+    
+}
